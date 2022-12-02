@@ -53,6 +53,10 @@ const schema = yup.object().shape( {
     .string()
     .required( "Пожалуйста, выберите подходящее значение" ),
 
+  // recommend: yup
+  //   .string()
+  //   .required( "Пожалуйста, выберите подходящее значение" ),
+
 
   // number: yup
   // .number()
@@ -86,9 +90,11 @@ const schema = yup.object().shape( {
 function Form() {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm( {
     resolver: yupResolver( schema ),
-    mode: "onBlur",
+    mode: "onTouched",
   } );
   const [ isMessageSent, setMessageSent ] = useState( 0 );
+  const [ isFirstOption, setFirstOption ] = useState( 1 );
+  const [ typeOfDate, setTypeOfDate ] = useState( "text" );
 
   const onSubmit = (data) => {
     console.log( data );
@@ -96,14 +102,17 @@ function Form() {
     setTimeout( () => {
       setMessageSent( 0 );
       reset();
+      setFirstOption( 1 );
+      setTypeOfDate( "text" );
     }, 3000 );
   };
 
   const onError = (errors, e) => console.log( errors, e );
 
   const handleFocus = (e) => {
-    e.target.type = "date";
+    setTypeOfDate( "date" );
   };
+
 
   return (
     <>
@@ -144,7 +153,8 @@ function Form() {
           { errors.email && <p className="form--error">{ errors.email.message }</p> }
           <p className="form__item"><label className="form__label" htmlFor="date">Дата посещения</label>
             <input
-              type="text"
+              // type="text"
+              type={ typeOfDate }
               placeholder="дд/мм/гггг"
               className={ errors.date ? "form__input form__input--error" : "form__input" }
               name="date"
@@ -181,21 +191,30 @@ function Form() {
             />
           </p>
           { errors.age && <p className="form--error">{ errors.age.message }</p> }
-          <p className="form__item">
+          <p className="form__item form__item--position--relative">
 
             <label className="form__label" htmlFor="cuisine">Любимая кухня</label>
+            { isFirstOption ?
+              <span className="form__option-first"
+                // style={ style }
+              >- Выберите подходящее значение -</span> : null }
             <select
               className={ errors.cuisine ? "form__select form__select--error" : "form__select" }
               placeholder="Выберите кухню"
               name="cuisine"
               id="cuisine"
               { ...register( "select" ) }
-              onChange={(e) => setValue('select', e.target.value, { shouldValidate: true })}
+
+              onChange={ (e) => {
+                setValue( "select", e.target.value, { shouldValidate: true } );
+                setFirstOption( 0 );
+              } }
             >
-              <option className="form__option" value="" disabled selected hidden>- Выберите подходящее значение -</option>
+              <option className="form__option" value=" " hidden></option>
               <option className="form__option" value="russian">Русская</option>
               <option className="form__option" value="japanese">Японская</option>
               <option className="form__option" value="italian">Итальянская</option>
+              <option className="form__option" value="alia">Другая</option>
             </select>
           </p>
           { errors.cuisine && <p className="form--error">{ errors.cuisine.message }</p> }
@@ -216,38 +235,42 @@ function Form() {
           <p className="form__question">Почему Вы выбрали наше заведение?</p>
 
           <p className="form__item form__item--position--left form__item--position--left">
-            <input className={ errors.near ? "form__check form__input--error" : "form__check" }
-                   type="checkbox"
-                   name="near"
-                   id="near"
-                   { ...register( "near" ) }
+            <input
+              className="form__check"
+              type="checkbox"
+              name="near"
+              id="near"
+              { ...register( "near" ) }
             />
             <label className="form__label form__label--wide" htmlFor="near">Недалеко от дома/работы</label>
           </p>
           <p className="form__item form__item--position--left">
-            <input className={ errors.advertising ? "form__check form__input--error" : "form__check" }
-                   type="checkbox"
-                   name="advertising"
-                   id="advertising"
-                   { ...register( "advertising" ) }
+            <input
+              className="form__check"
+              type="checkbox"
+              name="advertising"
+              id="advertising"
+              { ...register( "advertising" ) }
             />
             <label className="form__label form__label--wide" htmlFor="advertising">Увидел рекламу</label>
           </p>
           <p className="form__item form__item--position--left">
-            <input className={ errors.advice ? "form__check form__input--error" : "form__check" }
-                   type="checkbox"
-                   name="advice"
-                   id="advice"
-                   { ...register( "advice" ) }
+            <input
+              className="form__check"
+              type="checkbox"
+              name="advice"
+              id="advice"
+              { ...register( "advice" ) }
             />
             <label className="form__label form__label--wide" htmlFor="advice">Посоветовали</label>
           </p>
           <p className="form__item form__item--position--left">
-            <input className={ errors.quality ? "form__check form__input--error" : "form__check" }
-                   type="checkbox"
-                   name="quality"
-                   id="quality"
-                   { ...register( "quality" ) }
+            <input
+              className="form__check"
+              type="checkbox"
+              name="quality"
+              id="quality"
+              { ...register( "quality" ) }
             />
             <label className="form__label form__label--wide" htmlFor="quality">Оптимальное соотношение
               цены/качества</label>
@@ -255,29 +278,45 @@ function Form() {
 
           <p className="form__question">Вы будете рекомендовать наше заведение своим знакомым?</p>
           <p className="form__item form__item--position--left form__item--position--left">
-            <input className={ errors.recommend ? "form__check form__input--error" : "form__check" }
-                   type="radio"
-                   name="recommend"
-                   id="yes"
-                   checked
-                   { ...register( "recommend" ) }
+            <input
+              className="form__check"
+              type="radio"
+              name="recommend"
+              value="true"
+              id="true"
+              // checked="checked"
+              { ...register( "recommend" ) }
             />
-            <label className="form__label form__label--wide" htmlFor="yes">Да</label>
+            <label className="form__label form__label--wide" htmlFor="true">Да</label>
           </p>
           <p className="form__item form__item--position--left">
-            <input className={ errors.recommend ? "form__check form__input--error" : "form__check" }
-                   type="radio"
-                   name="recommend"
-                   id="not"
-                   { ...register( "recommend" ) }
+            <input
+              className="form__check"
+              type="radio"
+              name="recommend"
+              value="false"
+              id="false"
+              { ...register( "recommend" ) }
             />
-            <label className="form__label form__label--wide" htmlFor="not">Нет</label>
+            <label className="form__label form__label--wide" htmlFor="false">Нет</label>
+          </p>
+          <p className="form__item form__item--position--left">
+            <input
+              className="form__check"
+              type="radio"
+              name="recommend"
+              value="don't know"
+              id="don't know"
+              { ...register( "recommend" ) }
+            />
+            <label className="form__label form__label--wide" htmlFor="don't know">Не знаю</label>
           </p>
         </fieldset>
+        { isMessageSent ? <p className="form__success">Ваше сообщение отправлено</p> : null }
 
         <button type="submit" className="form__btn">Отправить</button>
       </form>
-      { isMessageSent ? <p>Ваше сообщение отправлено</p> : null }
+
     </>
   );
 }
