@@ -3,6 +3,15 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import TextField from "./TextField/TextField";
+import EmailField from "./EmailField/EmailField";
+import DateField from "./DateField/DateField";
+import MandatoryCheckbox from "./MandatoryCheckbox/MandatoryCheckbox";
+import NumberField from "./NumberField/NumberField";
+import MessageField from "./MessageField/MessageField";
+import SelectField from "./SelectField/SelectField";
+import CheckboxField from "./CheckboxField/CheckboxField";
+import RadioField from "./RadioField/RadioField";
 
 const nameRegExp = /[a-zA-zа-яА-яёЁ]$/;
 const phoneRegExp = /[+7][0-9]{10}$/;
@@ -15,7 +24,7 @@ const schema = yup.object().shape( {
   name: yup
     .string()
     .required( "Пожалуйста, заполните это поле" )
-    .matches( nameRegExp, "Допускаются только латинские или кирилические буквы" )
+    .matches( nameRegExp, "Допускаются только латинские или кириллические буквы" )
     .min( 2, "В этом поле должно быть не менее 2-х символов" )
     .max( 15, "В этом поле должно быть не более 15-х символов" ),
 
@@ -37,7 +46,7 @@ const schema = yup.object().shape( {
     .string()
     .required( "Пожалуйста, заполните это поле" )
     .min( 1, "В этом поле должно быть не менее одного символа" )
-    .max( 3, "В этом поле должно быть не более 3-х символов" )
+    .max( 2, "В этом поле должно быть не более 2-х символов" )
     .matches( ageRegExp, "Это поле должно содержать только целые положительные числа" ),
 
   email: yup
@@ -86,6 +95,110 @@ const schema = yup.object().shape( {
   //   .oneOf( [ yup.ref( "password" ), null ], "Значение этого поля должно совпадать со значением поля 'Пароль'" )
 } );
 
+const formFields1 = [
+  {
+    type: "text",
+    name: "name",
+    placeholder: "Иван",
+    label: "Имя"
+  },
+  {
+    type: "text",
+    name: "phone",
+    placeholder: "+79275681452",
+    label: "Телефон"
+  },
+  {
+    type: "email",
+    name: "email",
+    placeholder: "mail@mail.ru",
+    label: "Эл. почта"
+  },
+  {
+    type: "date",
+    name: "date",
+    placeholder: "дд/мм/гггг",
+    label: "Дата посещения"
+  },
+  {
+    type: "mandatoryCheckbox",
+    name: "consent",
+    placeholder: " ",
+    label: "Даю согласие на обработку моих персональных данных"
+  },
+];
+
+const formFields2 = [
+  {
+    type: "number",
+    name: "age",
+    id: "age",
+    placeholder: "18",
+    label: "Возраст"
+  },
+  {
+    type: "select",
+    name: "cuisine",
+    id: "cuisine",
+    placeholder: "18",
+    label: "Любимая кухня",
+    options: {
+      " ": " ",
+      russian: "Русская",
+      japanese: "Японская",
+      italian: "Итальянская",
+      other: "Другая"
+    }
+  },
+  {
+    type: "message",
+    name: "message",
+    id: "message",
+    placeholder: "Блины со сгущенкой",
+    label: "Какие блюда Вы хотели бы увидеть в меню?"
+  },
+];
+
+const formFields3 = [
+  {
+    name: "near",
+    id: "near",
+    label: "Недалеко от дома/работы"
+  },
+  {
+    name: "advertising",
+    id: "advertising",
+    label: "Увидел рекламу"
+  },
+  {
+    name: "advice",
+    id: "advice",
+    label: "Посоветовали"
+  },
+  {
+    name: "quality",
+    id: "quality",
+    label: "Оптимальное соотношение цены/качества"
+  },
+];
+
+const formFields4 = [
+  {
+    name: "recommend",
+    value: "true",
+    label: "Да"
+  },
+  {
+    name: "recommend",
+    value: "false",
+    label: "Нет"
+  },
+  {
+    name: "recommend",
+    value: "don't know",
+    label: "Не знаю"
+  },
+];
 
 function Form() {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm( {
@@ -95,6 +208,7 @@ function Form() {
   const [ isMessageSent, setMessageSent ] = useState( 0 );
   const [ isFirstOption, setFirstOption ] = useState( 1 );
   const [ typeOfDate, setTypeOfDate ] = useState( "text" );
+  const [ selectedOption, setSelectedOption ] = useState( "true" );
 
   const onSubmit = (data) => {
     console.log( data );
@@ -109,8 +223,18 @@ function Form() {
 
   const onError = (errors, e) => console.log( errors, e );
 
-  const handleFocus = (e) => {
+  const handleFocus = () => {
     setTypeOfDate( "date" );
+  };
+
+  const handleChangeSelect = (e) => {
+    setValue( "select", e.target.value, { shouldValidate: true } );
+    setFirstOption( 0 );
+  };
+
+  const handleChangeRadio = (e) => {
+    console.log( e.target.value );
+    setSelectedOption( e.target.value );
   };
 
 
@@ -121,197 +245,95 @@ function Form() {
         <h2 className="form__subtitle">Анкета посетителя ресторана</h2>
         <fieldset className="form__fieldset">
           <legend className="form__legend">Контактная информация</legend>
-          <p className="form__item"><label className="form__label" htmlFor="name">Имя</label>
-            <input
-              type="text"
-              className={ errors.name ? "form__input form__input--error" : "form__input" }
-              name="name"
-              id="name"
-              placeholder="Петр"
-              { ...register( "name" ) }/>
-          </p>
-          { errors.name && <p className="form--error">{ errors.name.message }</p> }
-          <p className="form__item"><label className="form__label" htmlFor="phone">Телефон</label>
-            <input
-              type="text"
-              className={ errors.phone ? "form__input form__input--error" : "form__input" }
-              name="phone"
-              id="phone"
-              placeholder="+79275681452"
-              { ...register( "phone" ) }/>
-          </p>
-          { errors.phone && <p className="form--error">{ errors.phone.message }</p> }
-          <p className="form__item"><label className="form__label" htmlFor="email">Эл. почта</label>
-            <input
-              type="text"
-              className={ errors.email ? "form__input form__input--error" : "form__input" }
-              name="email"
-              id="email"
-              placeholder="mail@mail.ru"
-              { ...register( "email" ) }/>
-          </p>
-          { errors.email && <p className="form--error">{ errors.email.message }</p> }
-          <p className="form__item"><label className="form__label" htmlFor="date">Дата посещения</label>
-            <input
-              // type="text"
-              type={ typeOfDate }
-              placeholder="дд/мм/гггг"
-              className={ errors.date ? "form__input form__input--error" : "form__input" }
-              name="date"
-              id="date"
-              { ...register( "date" ) }
-              onFocus={ handleFocus }
-            />
-          </p>
-          { errors.date && <p className="form--error">{ errors.date.message }</p> }
-          <p className="form__item form__item--position--left">
-            <input className={ errors.consent ? "form__check form__input--error" : "form__check" }
-                   type="checkbox"
-                   name="consent"
-                   id="consent"
-                   { ...register( "consent" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="consent">Даю согласие на обработку моих
-              персональных
-              данных</label>
-          </p>
-          { errors.consent && <p className="form--error">{ errors.consent.message }</p> }
+          { formFields1.map( (item) => {
+              switch( item.type ) {
+                case( "text" ):
+                  return (
+                    <TextField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }/>
+                  );
+
+                case( "email" ):
+                  return (
+                    <EmailField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }/>
+                  );
+
+                case( "date" ):
+                  return (
+                    <DateField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }
+                               typeOfDate={ typeOfDate } handleFocus={ handleFocus }/>
+
+                  );
+
+                case( "mandatoryCheckbox" ):
+                  return (
+                    <MandatoryCheckbox item={ item } register={ register( `${ item.name }` ) }
+                                       errors={ errors[ item.name ] }/>
+
+                  );
+                default:
+                  return null;
+              }
+            }
+          )
+          }
         </fieldset>
 
         <fieldset className="form__fieldset">
           <legend className="form__legend">Персональная информация</legend>
-          <p className="form__item">
-            <label className="form__label" htmlFor="age">Возраст</label>
-            <input type="number"
-                   placeholder="18"
-                   className={ errors.age ? "form__input form__input--error" : "form__input" }
-                   name="age"
-                   id="age"
-                   { ...register( "age" ) }
-            />
-          </p>
-          { errors.age && <p className="form--error">{ errors.age.message }</p> }
-          <p className="form__item form__item--position--relative">
+          {
+            formFields2.map( item => {
+              switch( item.type ) {
+                case( "number" ):
+                  return (
+                    <NumberField item={ item } register={ register( `${ item.name }` ) }
+                                 errors={ errors[ item.name ] }/>
+                  );
 
-            <label className="form__label" htmlFor="cuisine">Любимая кухня</label>
-            { isFirstOption ?
-              <span className="form__option-first"
-                // style={ style }
-              >- Выберите подходящее значение -</span> : null }
-            <select
-              className={ errors.cuisine ? "form__select form__select--error" : "form__select" }
-              placeholder="Выберите кухню"
-              name="cuisine"
-              id="cuisine"
-              { ...register( "select" ) }
+                case( "select" ):
+                  return (
+                    <SelectField item={ item } register={ register( `${ item.name }` ) }
+                                 errors={ errors[ item.name ] } isFirstOption={ isFirstOption }
+                                 handleChangeSelect={ handleChangeSelect }/>
+                  );
 
-              onChange={ (e) => {
-                setValue( "select", e.target.value, { shouldValidate: true } );
-                setFirstOption( 0 );
-              } }
-            >
-              <option className="form__option" value=" " hidden></option>
-              <option className="form__option" value="russian">Русская</option>
-              <option className="form__option" value="japanese">Японская</option>
-              <option className="form__option" value="italian">Итальянская</option>
-              <option className="form__option" value="alia">Другая</option>
-            </select>
-          </p>
-          { errors.cuisine && <p className="form--error">{ errors.cuisine.message }</p> }
-          <p className="form__item">
-            <label className="form__label" htmlFor="message">Какие блюда Вы хотели бы увидеть в меню?</label>
-            <textarea
-              placeholder="Блины со сгущенкой"
-              className="form__mess"
-              name="message"
-              id="message"
-              { ...register( "message" ) }
-            />
-          </p>
-          { errors.message && <p className="form--error">{ errors.message.message }</p> }
+
+                case( "message" ):
+                  return (
+                    <MessageField item={ item } register={ register( `${ item.name }` ) }
+                                  errors={ errors[ item.name ] }/>
+                  );
+
+                default:
+                  return null;
+              }
+            } )
+          }
         </fieldset>
+
         <fieldset className="form__fieldset">
           <legend className="form__legend">Оценка нашего заведения</legend>
           <p className="form__question">Почему Вы выбрали наше заведение?</p>
+          {
+            formFields3.map( item => {
 
-          <p className="form__item form__item--position--left form__item--position--left">
-            <input
-              className="form__check"
-              type="checkbox"
-              name="near"
-              id="near"
-              { ...register( "near" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="near">Недалеко от дома/работы</label>
-          </p>
-          <p className="form__item form__item--position--left">
-            <input
-              className="form__check"
-              type="checkbox"
-              name="advertising"
-              id="advertising"
-              { ...register( "advertising" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="advertising">Увидел рекламу</label>
-          </p>
-          <p className="form__item form__item--position--left">
-            <input
-              className="form__check"
-              type="checkbox"
-              name="advice"
-              id="advice"
-              { ...register( "advice" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="advice">Посоветовали</label>
-          </p>
-          <p className="form__item form__item--position--left">
-            <input
-              className="form__check"
-              type="checkbox"
-              name="quality"
-              id="quality"
-              { ...register( "quality" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="quality">Оптимальное соотношение
-              цены/качества</label>
-          </p>
+              return (
+                <CheckboxField item={ item } register={ register( `${ item.name }` ) }
+                />
+              );
+            } )
+          }
 
           <p className="form__question">Вы будете рекомендовать наше заведение своим знакомым?</p>
-          <p className="form__item form__item--position--left form__item--position--left">
-            <input
-              className="form__check"
-              type="radio"
-              name="recommend"
-              value="true"
-              id="true"
-              // checked="checked"
-              { ...register( "recommend" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="true">Да</label>
-          </p>
-          <p className="form__item form__item--position--left">
-            <input
-              className="form__check"
-              type="radio"
-              name="recommend"
-              value="false"
-              id="false"
-              { ...register( "recommend" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="false">Нет</label>
-          </p>
-          <p className="form__item form__item--position--left">
-            <input
-              className="form__check"
-              type="radio"
-              name="recommend"
-              value="don't know"
-              id="don't know"
-              { ...register( "recommend" ) }
-            />
-            <label className="form__label form__label--wide" htmlFor="don't know">Не знаю</label>
-          </p>
+          {
+            formFields4.map( item => {
+              return (
+                <RadioField item={ item } register={ register( `${ item.name }` ) } selectedOption={ selectedOption }
+                            handleChangeRadio={ handleChangeRadio }/>
+              );
+            } )
+          }
         </fieldset>
+
         { isMessageSent ? <p className="form__success">Ваше сообщение отправлено</p> : null }
 
         <button type="submit" className="form__btn">Отправить</button>
