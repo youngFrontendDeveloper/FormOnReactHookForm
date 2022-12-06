@@ -42,5 +42,6 @@
     "@hookform/resolvers": "^2.9.10",
     "react-hook-form": "^7.39.7",
     "yup": "^0.32.11"
-  }
+  },
+  "homepage": "."
 }

@@ -62,12 +62,8 @@ const schema = yup.object().shape( {
     .string()
     .required( "Пожалуйста, выберите подходящее значение" ),
 
-  // recommend: yup
-  //   .string()
-  //   .required( "Пожалуйста, выберите подходящее значение" ),
 
-
-  // number: yup
+    // number: yup
   // .number()
   // .required( "Пожалуйста, заполните это поле" )
   // .min(1, "В этом поле должно быть не менее одного символа")
@@ -211,13 +207,14 @@ function Form() {
   const [ selectedOption, setSelectedOption ] = useState( "true" );
 
   const onSubmit = (data) => {
-    console.log( data );
+    console.log(data);
     setMessageSent( 1 );
     setTimeout( () => {
       setMessageSent( 0 );
       reset();
       setFirstOption( 1 );
       setTypeOfDate( "text" );
+      setSelectedOption( "true" );
     }, 3000 );
   };
 
@@ -245,21 +242,21 @@ function Form() {
         <h2 className="form__subtitle">Анкета посетителя ресторана</h2>
         <fieldset className="form__fieldset">
           <legend className="form__legend">Контактная информация</legend>
-          { formFields1.map( (item) => {
+          { formFields1.map( (item, index) => {
               switch( item.type ) {
                 case( "text" ):
                   return (
-                    <TextField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }/>
+                    <TextField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] } key={`${item.id}-${index}`}/>
                   );
 
                 case( "email" ):
                   return (
-                    <EmailField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }/>
+                    <EmailField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] } key={`${item.id}-${index}`}/>
                   );
 
                 case( "date" ):
                   return (
-                    <DateField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] }
+                    <DateField item={ item } register={ register( `${ item.name }` ) } errors={ errors[ item.name ] } key={`${item.id}-${index}`}
                                typeOfDate={ typeOfDate } handleFocus={ handleFocus }/>
 
                   );
@@ -267,7 +264,7 @@ function Form() {
                 case( "mandatoryCheckbox" ):
                   return (
                     <MandatoryCheckbox item={ item } register={ register( `${ item.name }` ) }
-                                       errors={ errors[ item.name ] }/>
+                                       errors={ errors[ item.name ] } key={`${item.id}-${index}`}/>
 
                   );
                 default:
@@ -281,18 +278,18 @@ function Form() {
         <fieldset className="form__fieldset">
           <legend className="form__legend">Персональная информация</legend>
           {
-            formFields2.map( item => {
+            formFields2.map( (item, index) => {
               switch( item.type ) {
                 case( "number" ):
                   return (
                     <NumberField item={ item } register={ register( `${ item.name }` ) }
-                                 errors={ errors[ item.name ] }/>
+                                 errors={ errors[ item.name ] } key={`${item.id}-${index}`}/>
                   );
 
                 case( "select" ):
                   return (
                     <SelectField item={ item } register={ register( `${ item.name }` ) }
-                                 errors={ errors[ item.name ] } isFirstOption={ isFirstOption }
+                                 errors={ errors[ item.name ] } key={`${item.id}-${index}`} isFirstOption={ isFirstOption }
                                  handleChangeSelect={ handleChangeSelect }/>
                   );
 
@@ -300,7 +297,7 @@ function Form() {
                 case( "message" ):
                   return (
                     <MessageField item={ item } register={ register( `${ item.name }` ) }
-                                  errors={ errors[ item.name ] }/>
+                                  errors={ errors[ item.name ] } key={`${item.id}-${index}`}/>
                   );
 
                 default:
@@ -314,10 +311,10 @@ function Form() {
           <legend className="form__legend">Оценка нашего заведения</legend>
           <p className="form__question">Почему Вы выбрали наше заведение?</p>
           {
-            formFields3.map( item => {
+            formFields3.map(  (item, index) => {
 
               return (
-                <CheckboxField item={ item } register={ register( `${ item.name }` ) }
+                <CheckboxField item={ item } register={ register( `${ item.name }` ) } key={`${item.id}-${index}`}
                 />
               );
             } )
@@ -325,9 +322,9 @@ function Form() {
 
           <p className="form__question">Вы будете рекомендовать наше заведение своим знакомым?</p>
           {
-            formFields4.map( item => {
+            formFields4.map(  (item, index) => {
               return (
-                <RadioField item={ item } register={ register( `${ item.name }` ) } selectedOption={ selectedOption }
+                <RadioField item={ item } register={ register( `${ item.name }` ) }  key={`${item.id}-${index}`} selectedOption={ selectedOption }
                             handleChangeRadio={ handleChangeRadio }/>
               );
             } )
